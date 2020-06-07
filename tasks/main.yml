@@ -1,0 +1,106 @@
+---
+# tasks file for cisco-automation/
+#
+
+- name: configure top level configuration
+  ios_config:
+    lines: hostname {{ inventory_hostname }}
+
+- name: configure interface settings
+  ios_config:
+    lines:
+      - description test interface
+      - ip address 172.31.1.1 255.255.255.0
+    parents: interface GigabitEthernet2
+
+- set_fact: time="{{lookup('pipe','date +%Y-%m-%d_%H_%M_')}}"
+
+- name: configurable backup path
+  ios_config:
+#    src: ios_template.j2
+    backup: yes
+    backup_options:
+      filename: '{{ time }}backup.cfg'
+      dir_path: /home/daniel/backups/{{ inventory_hostname }}
+
+- name: Run cli_command on Cisco IOS and display results
+  block:
+  - name: Run cli_command on Cisco IOS
+    cli_command:
+      command: show ip int br
+    register: result
+
+  - name: Display result to terminal window
+    debug:
+      var: result.stdout_lines
+  when: ansible_network_os == 'ios'
+
+- name: Change Password for User netop
+  ios_user:
+    name: netop
+    configured_password: "{{ netop_new_password }}"
+    update_password: always
+    state: present
+
+- name: Aggregate of users
+  ios_user:
+    aggregate:
+      - name: ansibletest2
+      - name: ansibletest3
+    view: network-admin
+    privilege: 15
+
+- name: Add a user specifying password type
+  ios_user:
+    name: ansibletest4
+    configured_password: "{{ ansibletest4_new_password }}"
+    password_type: password
+
+# - name: Add a user with MD5 hashed password
+#   ios_user:
+#     name: ansibletest5
+#     hashed_password:
+#       type: 5
+#       value: d3a186b5ded7b8958bc5f066a7df80ec
+#     update_password: always
+# # ansibletest2020
+
+# - name: Delete users with aggregate
+#   ios_user:
+#     aggregate:
+#       - name: ansibletest1
+#       - name: ansibletest2
+#       - name: ansibletest3
+#     state: absent
+
+# - name: configure multiple lines of configuration on multiple interfaces
+#   ios_config:
+#     lines:
+#       - switchport mode access
+#       - switchport access vlan 125
+#       - switchport nonegotiate
+#       - spanning-tree portfast 
+#       - spanning-tree bpduguard enable
+#     parents: "{{ item }}"
+#   with_items:
+#     - interface GigabitEthernet1/0/1
+#     - interface GigabitEthernet1/0/2
+#     - interface GigabitEthernet1/0/3
+
+# Set boot image based on comparison to a group_var (version) and the version
+# that is returned from the `ios_facts` module
+# - name: SETTING BOOT IMAGE
+#   ios_config:
+#     lines:
+#       - no boot system
+#       - boot system flash bootflash:{{new_image}}
+#     host: "{{ inventory_hostname }}"
+#   when: ansible_net_version != version
+
+# - name: check the startup-config against the running-config
+#   ios_config:
+#     diff_against: startup
+#     diff_ignore_lines:
+#       - ntp clock .*
+
+

@@ -1,0 +1,7 @@
+---
+# vars file for cisco-automation/
+#
+
+inventory_hostname: "csr-1"
+netop_new_password: "ansibletest2020"
+ansibletest4_new_password: "ansibletest2020"

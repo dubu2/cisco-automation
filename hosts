@@ -1,0 +1,11 @@
+[cisco_unit_testing]
+csr-1
+
+[cisco_unit_testing:vars]
+ansible_connection=network_cli
+ansible_network_os=ios
+ansible_become=yes
+ansible_become_method=enable
+ansible_password=yo_mamas_8008135
+ansible_user=yo_daddy
+ansible_python_interpreter=/usr/bin/python
